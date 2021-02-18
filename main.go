@@ -61,7 +61,7 @@ func newDriver(user, sec, svrs string, debug bool) (*Driver, error) {
 func (d *Driver) add(name, ID, mountPath string, mounts int64) error {
 	var err error
 	if _, found := d.volumes[name]; found {
-		d.volumes[name].mounts+=mounts
+		d.volumes[name].mounts++
 		if d.volumes[name].ID == "" {
 			d.volumes[name].ID = ID
 		} else if ID != "" && d.volumes[name].ID != ID {
@@ -306,12 +306,14 @@ func (d *Driver) Mount(r *volume.MountRequest) (*volume.MountResponse, error) {
 		}
 		return nil,err
 	}
-	err = d.cephfsMount(mp,path.Join(baseDir, r.Name))
-	if err != nil {
-		if d.debug {
-			log.Printf("CEPHFS: FAILED: MOUNT: %s mount: %s\n", r.Name, err)
+	if d.volumes[r.Name].mounts <= 1 {
+		err = d.cephfsMount(mp,path.Join(baseDir, r.Name))
+		if err != nil {
+			if d.debug {
+				log.Printf("CEPHFS: FAILED: MOUNT: %s mount: %s\n", r.Name, err)
+			}
+			return nil,err
 		}
-		return nil,err
 	}
 	return &volume.MountResponse{
 		Mountpoint: mp,
@@ -325,11 +327,14 @@ func (d *Driver) Unmount(r *volume.UnmountRequest) error {
 		log.Printf("CEPHFS: INFO: Unmount Called %s,%s\n",r.Name,r.ID)
 	}
 	//TODO: improve error management
-	//TODO: Only umount when mounts==0
 	if _, found := d.volumes[r.Name]; found {
 		d.volumes[r.Name].mounts--
 	}
-	return d.cephfsUMount(path.Join(volume.DefaultDockerRootDirectory, r.Name))
+	if d.volumes[r.Name].mounts == 0 {
+		return d.cephfsUMount(path.Join(volume.DefaultDockerRootDirectory, r.Name))
+        } else {
+		return nil
+	}
 }
 func (d *Driver) Path(r *volume.PathRequest) (*volume.PathResponse, error) {
 	if d.debug {

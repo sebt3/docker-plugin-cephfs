@@ -21,6 +21,12 @@
 			"Value": "0"
 		},
 		{
+			"Name": "BASEDIR",
+			"Description": "Directory within the CEPHFS to use",
+			"Settable": ["value"],
+			"Value": "/docker"
+		},
+		{
 			"Name": "CLIENT_NAME",
 			"Description": "Default client name to connect to the ceph cluster with when none specified",
 			"Settable": ["value"],

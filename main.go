@@ -30,8 +30,8 @@ import (
 
 const (
 	socket	= "cephfs"
-	baseDir	= "/docker"
 )
+var baseDir = "/docker"
 
 type Volume struct {
 	name		string
@@ -351,6 +351,7 @@ func main() {
 	debug:= getEnv("DEBUG", "0")
 	user := getEnv("CLIENT_NAME", "admin")
 	secr := getEnv("SECRET", "")
+	baseDir = getEnv("BASEDIR", baseDir)
 	if secr == "" {
 		ring, err := ini.Load(fmt.Sprintf("/etc/ceph/ceph.client.%s.keyring",user))
 		if err != nil {

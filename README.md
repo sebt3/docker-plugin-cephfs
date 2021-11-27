@@ -21,6 +21,7 @@ docker plugin install --alias cephfs sebt3/docker-plugin-cephfs:master --grant-a
 docker plugin disable cephfs --force
 ceph auth get-or-create client.dockeruser mon 'allow r' osd 'allow rw' mds 'allow' > /etc/ceph/ceph.client.dockeruser.keyring
 docker plugin set cephfs CLIENT_NAME=dockeruser
+docker plugin set cephfs BASEDIR=/docker2
 docker plugin enable cephfs
 ```
 
